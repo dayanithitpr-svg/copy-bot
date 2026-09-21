@@ -37,7 +37,7 @@ const env = {
   AUTH_RATE_LIMIT_MAX: parseInt(process.env.AUTH_RATE_LIMIT_MAX, 10) || 20,
 
   // Phase 3 Blockchain RPC Providers
-  ETHEREUM_RPC_URL: process.env.ETHEREUM_RPC_URL || 'https://cloudflare-eth.com',
+  ETHEREUM_RPC_URL: process.env.ETHEREUM_RPC_URL || 'https://rpc.flashbots.net',
   BASE_RPC_URL: process.env.BASE_RPC_URL || 'https://mainnet.base.org',
   POLYGON_RPC_URL: process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com',
   SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
