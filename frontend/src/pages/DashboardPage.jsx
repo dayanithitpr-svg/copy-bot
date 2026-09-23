@@ -37,15 +37,19 @@ const DashboardPage = () => {
     const fetchDashboard = async () => {
       try {
         const [tradersRes, actRes, healthData] = await Promise.all([
-          traderService.getTraders().catch(() => ({ data: { traders: [] } })),
-          traderService.getAllActivities({ limit: 6 }).catch(() => ({ data: { activities: [], pagination: { total: 0 } } })),
+          traderService.getTraders().catch(() => ({ items: [] })),
+          traderService.getRecentActivities({ limit: 6 }).catch(() => ({ items: [], pagination: { total: 0 } })),
           healthService.getHealth().catch(() => ({ status: 'unknown' })),
         ]);
 
         if (mounted) {
-          setTraders(tradersRes.data?.traders || []);
-          setActivities(actRes.data?.activities || []);
-          setTotalActivities(actRes.data?.pagination?.total || (actRes.data?.activities || []).length);
+          const traderItems = tradersRes.items || tradersRes.traders || tradersRes.data?.items || tradersRes.data?.traders || [];
+          const actItems = actRes.items || actRes.activities || actRes.data?.items || actRes.data?.activities || [];
+          const totalAct = actRes.pagination?.total || actRes.data?.pagination?.total || actItems.length;
+
+          setTraders(traderItems);
+          setActivities(actItems);
+          setTotalActivities(totalAct);
           setHealth(healthData);
           setLoading(false);
         }
@@ -57,7 +61,7 @@ const DashboardPage = () => {
     fetchDashboard();
   }, []);
 
-  const activeTraders = traders.filter((t) => t.isTracking);
+  const activeTraders = traders.filter((t) => (t.isTracking !== undefined ? t.isTracking : t.trackingEnabled));
   const isHealthy = health?.status === 'ok' || health?.status === 'healthy';
   const isMonitoring = health?.monitoring?.status === 'running' || health?.monitoring?.enabled;
 

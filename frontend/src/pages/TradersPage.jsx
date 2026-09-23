@@ -36,7 +36,8 @@ const TradersPage = () => {
     setLoading(true);
     try {
       const res = await traderService.getTraders();
-      setTraders(res.data?.traders || []);
+      const items = res.items || res.traders || res.data?.items || res.data?.traders || [];
+      setTraders(items);
     } catch (err) {
       toastError(err.response?.data?.message || 'Failed to load tracked traders');
     } finally {
@@ -67,7 +68,7 @@ const TradersPage = () => {
   const handleToggleStatus = async (traderId, newTrackingState) => {
     try {
       const res = await traderService.updateTrader(traderId, { isTracking: newTrackingState });
-      const updated = res.data?.trader || res.data;
+      const updated = res.data?.trader || res.data || res;
       setTraders((prev) => prev.map((t) => ((t._id || t.id) === traderId ? updated : t)));
       success(newTrackingState ? 'Monitoring resumed for trader' : 'Monitoring paused for trader');
     } catch (err) {
@@ -76,9 +77,10 @@ const TradersPage = () => {
   };
 
   const filteredTraders = traders.filter((t) => {
+    const isTracking = t.isTracking !== undefined ? t.isTracking : t.trackingEnabled;
     if (selectedNetwork && t.network?.toUpperCase() !== selectedNetwork.toUpperCase()) return false;
-    if (selectedStatus === 'ACTIVE' && !t.isTracking) return false;
-    if (selectedStatus === 'PAUSED' && t.isTracking) return false;
+    if (selectedStatus === 'ACTIVE' && !isTracking) return false;
+    if (selectedStatus === 'PAUSED' && isTracking) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (

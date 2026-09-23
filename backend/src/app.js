@@ -24,10 +24,13 @@ app.use(
 );
 
 // 2. CORS Configuration
+const healthRoutes = require('./routes/v1/healthRoutes');
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, postman) or matching CLIENT_URL
-    if (!origin || origin === env.CLIENT_URL || origin === 'http://localhost:5173' || origin === 'http://127.0.0.1:5173') {
+    // Allow requests with no origin (like mobile apps, curl, postman), matching CLIENT_URL, or any localhost dev port (including IPv6 [::1])
+    const isLocalhost = origin && /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(origin);
+    if (!origin || origin === env.CLIENT_URL || isLocalhost || env.isDevelopment()) {
       callback(null, true);
     } else {
       callback(new Error(`CORS policy violation: origin ${origin} is not allowed`));
@@ -48,7 +51,10 @@ app.use(cookieParser(env.COOKIE_SECRET));
 app.use(correlationId);
 app.use(requestLogger);
 
-// 5. Global Rate Limiter for all API routes
+// Health check endpoint (exempt from global rate limiter to support continuous status polling)
+app.use('/api/v1/health', healthRoutes);
+
+// 5. Global Rate Limiter for all other API routes
 app.use('/api/', globalLimiter);
 
 // 6. Versioned API Routes

@@ -84,6 +84,9 @@ api.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         setAccessToken(null);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('auth:unauthorized'));
+        }
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

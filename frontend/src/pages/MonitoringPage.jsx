@@ -34,7 +34,8 @@ const MonitoringPage = () => {
         traderService.getTraders(),
       ]);
       setHealth(healthData);
-      setTraders(tradersRes.data?.traders || []);
+      const items = tradersRes.items || tradersRes.traders || tradersRes.data?.items || tradersRes.data?.traders || [];
+      setTraders(items);
     } catch (err) {
       toastError('Failed to fetch monitoring status or checkpoints');
     } finally {
@@ -65,17 +66,17 @@ const MonitoringPage = () => {
     setSyncingAll(true);
     info('Triggering manual blockchain sync for all active wallets...');
     try {
-      const activeTraders = traders.filter((t) => t.isTracking);
+      const activeTradersList = traders.filter((t) => (t.isTracking !== undefined ? t.isTracking : t.trackingEnabled));
       let totalNew = 0;
-      for (const t of activeTraders) {
+      for (const t of activeTradersList) {
         try {
-          const res = await traderService.syncTrader(t._id);
+          const res = await traderService.syncTrader(t._id || t.id);
           totalNew += res.data?.newActivitiesCount || 0;
         } catch (e) {
           // ignore single failure in batch
         }
       }
-      success(`Batch sync finished: ${totalNew} new events captured across ${activeTraders.length} wallets.`);
+      success(`Batch sync finished: ${totalNew} new events captured across ${activeTradersList.length} wallets.`);
       fetchData();
     } catch (err) {
       toastError('Error during batch sync');
@@ -84,7 +85,7 @@ const MonitoringPage = () => {
     }
   };
 
-  const activeTraders = traders.filter((t) => t.isTracking);
+  const activeTraders = traders.filter((t) => (t.isTracking !== undefined ? t.isTracking : t.trackingEnabled));
   const isHealthy = health?.status === 'ok' || health?.status === 'healthy';
   const isMonitoringRunning = health?.monitoring?.status === 'running' || health?.monitoring?.enabled;
 

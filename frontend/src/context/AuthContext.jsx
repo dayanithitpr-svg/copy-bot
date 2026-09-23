@@ -27,7 +27,21 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
+    const handleUnauthorized = () => {
+      setAccessToken(null);
+      setUser(null);
+    };
+
     initAuth();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:unauthorized', handleUnauthorized);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      }
+    };
   }, []);
 
   const login = async (email, password) => {
