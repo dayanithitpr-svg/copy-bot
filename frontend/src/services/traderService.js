@@ -85,7 +85,6 @@ export const traderService = {
 
   /**
    * Get on-chain activity for a specific trader (Phase 3)
-   */
   async getTraderActivity(id, { page = 1, limit = 20, activityType = '', status = '' } = {}) {
     const params = new URLSearchParams();
     if (page) params.append('page', page);
@@ -94,7 +93,11 @@ export const traderService = {
     if (status) params.append('status', status);
 
     const response = await api.get(`/traders/${id}/activity?${params.toString()}`);
-    return response.data?.data || { items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 1 } };
+    return response.data;
+  },
+  
+  async getTraderActivities(id, options) {
+    return this.getTraderActivity(id, options);
   },
 
   /**

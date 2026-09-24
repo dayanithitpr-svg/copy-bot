@@ -238,8 +238,8 @@ const MonitoringPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {traders.map((trader) => (
-                  <tr key={trader._id}>
+                {traders.map((trader, idx) => (
+                  <tr key={trader._id || trader.id || trader.walletAddress || idx}>
                     <td>
                       <div>
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>

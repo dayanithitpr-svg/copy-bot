@@ -560,18 +560,18 @@ const ExecutionSettingsPage = () => {
               Allowlisted Testnet Routers & Faucets
             </h3>
             <div className="space-y-3 text-xs text-slate-400">
-              {networksData.map((net) => (
-                <div key={net.id} className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+              {networksData.map((net, idx) => (
+                <div key={net.id || idx} className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
                   <div className="flex items-center justify-between text-white font-semibold mb-1">
                     <span>{net.name}</span>
                     <span className="text-[10px] font-mono text-slate-500">ID: {net.chainId}</span>
                   </div>
                   <div className="text-[11px] text-slate-400 font-mono truncate mb-1">
-                    Router: {net.uniswapV2Router}
+                    Router: {typeof net.uniswapV2Router === 'string' ? net.uniswapV2Router : (Array.isArray(net.uniswapV2Router) ? net.uniswapV2Router.join(', ') : 'N/A')}
                   </div>
                   <div className="flex flex-wrap gap-1 mt-1.5">
-                    {(net.tokens || []).map((t) => (
-                      <span key={t.symbol} className="px-1.5 py-0.5 bg-slate-800 text-[10px] rounded text-indigo-300 font-mono">
+                    {(net.tokens || []).map((t, tIdx) => (
+                      <span key={t.symbol || tIdx} className="px-1.5 py-0.5 bg-slate-800 text-[10px] rounded text-indigo-300 font-mono">
                         {t.symbol}
                       </span>
                     ))}

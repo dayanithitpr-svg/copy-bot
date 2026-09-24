@@ -126,15 +126,19 @@ class ExecutionController {
   async getNetworks(req, res, next) {
     try {
       const allowedNetworks = executionNetworkRegistry.getAllowedNetworks();
-      const networkData = allowedNetworks.map((net) => ({
-        id: net.id,
-        name: net.name,
-        chainId: net.chainId,
-        currencySymbol: net.nativeCurrency?.symbol || 'ETH',
-        explorerUrl: net.explorerUrl,
-        uniswapV2Router: net.protocols,
-        tokens: testnetTokenRegistry.getTokensForNetwork(net.id)
-      }));
+      const networkData = allowedNetworks.map((net) => {
+        const routerInfo = executionNetworkRegistry.getRouter(net.id);
+        return {
+          id: net.id,
+          name: net.name,
+          chainId: net.chainId,
+          currencySymbol: net.nativeCurrency?.symbol || 'ETH',
+          explorerUrl: net.explorerUrl,
+          uniswapV2Router: routerInfo?.address || (Array.isArray(net.protocols) ? net.protocols.join(', ') : 'N/A'),
+          protocols: net.protocols || [],
+          tokens: testnetTokenRegistry.getTokensForNetwork(net.id) || []
+        };
+      });
 
       const killSwitchActive = productionSafetyService.isKillSwitchActive();
 
@@ -149,6 +153,7 @@ class ExecutionController {
         }
       });
     } catch (err) {
+      logger.error('Error fetching execution networks:', err);
       next(err);
     }
   }

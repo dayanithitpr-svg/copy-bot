@@ -45,22 +45,30 @@ const TraderActivityModal = ({ isOpen, onClose, trader }) => {
       };
       if (activityTypeFilter) params.activityType = activityTypeFilter;
 
-      const res = await traderService.getTraderActivities(traderId, params);
-      setActivities(res.data?.activities || []);
-      setPagination(res.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 });
+      const res = await traderService.getTraderActivity(traderId, params);
+      const items = res?.data?.items || res?.items || res?.activities || [];
+      const pag = res?.data?.pagination || res?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
+
+      setActivities(items);
+      setPagination({
+        page: pag.page || 1,
+        limit: pag.limit || 10,
+        total: pag.total || 0,
+        pages: pag.totalPages || pag.pages || 1
+      });
     } catch (err) {
       toastError(err.response?.data?.message || 'Failed to load activity stream');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [traderId, activityTypeFilter, toastError]);
+  }, [traderId, activityTypeFilter]);
 
   useEffect(() => {
     if (isOpen && traderId) {
       fetchActivity(1);
     }
-  }, [isOpen, traderId, fetchActivity]);
+  }, [isOpen, traderId, activityTypeFilter]);
 
   if (!isOpen || !trader) return null;
 
